@@ -1,0 +1,23 @@
+{
+  "mappings": {
+    "properties": {
+      "productId": { "type": "keyword" },
+      "issuer": { "type": "keyword" },
+      "network": { "type": "keyword" },
+      "country": { "type": "keyword" },
+      "name": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "retrievedAt": { "type": "date" },
+      "reviewStatus": { "type": "keyword" },
+      "rewards": {
+        "type": "nested",
+        "properties": {
+          "category": { "type": "keyword" },
+          "unit": { "type": "keyword" },
+          "rate": { "type": "double" },
+          "bookingChannels": { "type": "keyword" },
+          "paypalEligibility": { "type": "keyword" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reward Harbor</title><link rel="stylesheet" href="panel.css"><script type="module" src="panel.js"></script></head>
+<body>
+  <header><span class="mark">↗</span><div><h1>Reward Harbor</h1><p>Your independent card rewards companion.</p></div><section id="savings" hidden aria-live="polite"></section></header>
+  <div class="banner">SANDBOX · SOURCED REWARDS · ASSUMED CARD TYPES</div>
+  <main hidden>
+    <section id="purchase-details"><div class="section-title"><h2>Your purchase</h2><button id="refresh">Refresh</button></div>
+      <p id="purchase-summary">Reading checkout…</p><p id="card-count" class="muted"></p>
+
+    </section>
+    <div id="results"></div><p id="status" role="status" aria-live="polite">Reading this page…</p>
+
+  </main>
+<dialog id="receipt-dialog" aria-labelledby="receipt-title"><div class="section-title"><h2 id="receipt-title">Payment successful <span class="success-tick" aria-hidden="true">✓</span></h2><button id="close-receipt" aria-label="Close savings confirmation">✕</button></div><div id="receipt-content"></div></dialog>
+</body></html>

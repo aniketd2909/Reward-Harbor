@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-12T03:57:09.434Z",
+  "cards": [
+    {
+      "schemaVersion": 1,
+      "id": "us-amex-gold",
+      "productId": "us-amex-gold",
+      "issuer": "American Express",
+      "name": "American Express Gold Card",
+      "network": "Amex",
+      "country": "US",
+      "rewardCurrency": "Membership Rewards",
+      "rewards": [
+        {
+          "id": "us-amex-gold-dining",
+          "category": "dining",
+          "rate": 4,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "annualSpendCapUsd": 50000,
+          "capPeriod": "calendar_year",
+          "afterCapRate": 1,
+          "geography": "worldwide"
+        },
+        {
+          "id": "us-amex-gold-grocery",
+          "category": "grocery",
+          "rate": 4,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "annualSpendCapUsd": 25000,
+          "capPeriod": "calendar_year",
+          "afterCapRate": 1,
+          "geography": "US",
+          "conditions": [
+            "Eligible U.S. supermarkets; merchant classification matters."
+          ]
+        },
+        {
+          "id": "us-amex-gold-flights",
+          "category": "flights",
+          "rate": 3,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "bookingChannels": [
+            "airline_direct",
+            "amex_travel"
+          ]
+        },
+        {
+          "id": "us-amex-gold-hotels",
+          "category": "hotels",
+          "rate": 5,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "prepaidRequired": true,
+          "bookingChannels": [
+            "amex_travel"
+          ]
+        }
+      ],
+      "sourceUrl": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+      "retrievedAt": "2026-11-12T03:57:01.072Z",
+      "sourceHash": "014fd3ef3e2178d79d31ec5e2aa461cd2dad4e1e4a1ede256586b3ccb578a334",
+      "demo": false,
+      "reviewStatus": "advertised_summary_only",
+      "paypalEligibility": "unknown",
+      "exclusions": [
+        "Welcome bonuses and personalized offers are not included.",
+        "Statement credits and annual-fee value are not included."
+      ],
+      "caveats": [
+        "Selected advertised benefits only; this is not a complete rewards agreement.",
+        "Review full issuer terms before payment recommendations.",
+        "Points are not a cashback percentage.",
+        "Category and booking-channel eligibility must be confirmed."
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "us-amex-platinum",
+      "productId": "us-amex-platinum",
+      "issuer": "American Express",
+      "name": "American Express Platinum Card",
+      "network": "Amex",
+      "country": "US",
+      "rewardCurrency": "Membership Rewards",
+      "rewards": [
+        {
+          "id": "us-amex-platinum-base",
+          "category": "*",
+          "rate": 1,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown"
+        },
+        {
+          "id": "us-amex-platinum-flights",
+          "category": "flights",
+          "rate": 5,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "annualSpendCapUsd": 500000,
+          "capPeriod": "calendar_year",
+          "afterCapRate": 1,
+          "bookingChannels": [
+            "airline_direct",
+            "amex_travel"
+          ]
+        },
+        {
+          "id": "us-amex-platinum-hotels",
+          "category": "hotels",
+          "rate": 5,
+          "unit": "points_per_usd",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "prepaidRequired": true,
+          "bookingChannels": [
+            "amex_travel"
+          ]
+        }
+      ],
+      "sourceUrl": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+      "retrievedAt": "2026-11-12T03:57:03.846Z",
+      "sourceHash": "ccd5cdef8d7fd1a09ce7c612a31ca5dadac29daaf34165222858dcd119b40392",
+      "demo": false,
+      "reviewStatus": "advertised_summary_only",
+      "paypalEligibility": "unknown",
+      "exclusions": [
+        "Welcome bonuses and personalized offers are not included.",
+        "Statement credits and annual-fee value are not included."
+      ],
+      "caveats": [
+        "Selected advertised benefits only; this is not a complete rewards agreement.",
+        "Review full issuer terms before payment recommendations.",
+        "Points are not a cashback percentage.",
+        "Category and booking-channel eligibility must be confirmed."
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "us-amex-blue-cash-preferred",
+      "productId": "us-amex-blue-cash-preferred",
+      "issuer": "American Express",
+      "name": "Blue Cash Preferred Card",
+      "network": "Amex",
+      "country": "US",
+      "rewardCurrency": "Reward Dollars",
+      "rewards": [
+        {
+          "id": "us-amex-blue-cash-preferred-base",
+          "category": "*",
+          "rate": 1,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown"
+        },
+        {
+          "id": "us-amex-blue-cash-preferred-grocery",
+          "category": "grocery",
+          "rate": 6,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "annualSpendCapUsd": 6000,
+          "capPeriod": "year_unspecified",
+          "afterCapRate": 1,
+          "geography": "US"
+        },
+        {
+          "id": "us-amex-blue-cash-preferred-streaming",
+          "category": "streaming",
+          "rate": 6,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "geography": "US",
+          "conditions": [
+            "Only selected streaming subscriptions qualify."
+          ]
+        },
+        {
+          "id": "us-amex-blue-cash-preferred-transit",
+          "category": "transit",
+          "rate": 3,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown"
+        },
+        {
+          "id": "us-amex-blue-cash-preferred-gas",
+          "category": "gas",
+          "rate": 3,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "geography": "US",
+          "conditions": [
+            "Eligible U.S. gas stations."
+          ]
+        }
+      ],
+      "sourceUrl": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/",
+      "retrievedAt": "2026-11-12T03:57:06.488Z",
+      "sourceHash": "6d3aad6c2bd10af00613fc393aa5ff71d41878b926bc34ef81f65b6cb52e1155",
+      "demo": false,
+      "reviewStatus": "advertised_summary_only",
+      "paypalEligibility": "unknown",
+      "exclusions": [
+        "Welcome bonuses and personalized offers are not included.",
+        "Statement credits and annual-fee value are not included."
+      ],
+      "caveats": [
+        "Selected advertised benefits only; this is not a complete rewards agreement.",
+        "Review full issuer terms before payment recommendations.",
+        "Points are not a cashback percentage.",
+        "Category and booking-channel eligibility must be confirmed."
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "us-chase-freedom-unlimited",
+      "productId": "us-chase-freedom-unlimited",
+      "issuer": "Chase",
+      "name": "Chase Freedom Unlimited",
+      "network": "Visa",
+      "country": "US",
+      "rewardCurrency": "Cashback equivalent (Ultimate Rewards)",
+      "rewards": [
+        {
+          "id": "us-chase-freedom-unlimited-base",
+          "category": "*",
+          "rate": 1.5,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown"
+        },
+        {
+          "id": "us-chase-freedom-unlimited-dining",
+          "category": "dining",
+          "rate": 3,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown"
+        },
+        {
+          "id": "us-chase-freedom-unlimited-drugstores",
+          "category": "drugstores",
+          "rate": 3,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown"
+        },
+        {
+          "id": "us-chase-freedom-unlimited-travel",
+          "category": "travel",
+          "rate": 5,
+          "unit": "cashback_percent",
+          "rateType": "total",
+          "activationRequired": false,
+          "paypalEligibility": "unknown",
+          "bookingChannels": [
+            "chase_travel"
+          ]
+        }
+      ],
+      "sourceUrl": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+      "retrievedAt": "2026-11-12T03:57:09.333Z",
+      "sourceHash": "528da0a924a4bfa50bf30ff5b90e7b57d6030b5c143ff73b3b527f05cce09a2c",
+      "demo": false,
+      "reviewStatus": "advertised_summary_only",
+      "paypalEligibility": "unknown",
+      "exclusions": [
+        "Welcome bonuses and personalized offers are not included.",
+        "Statement credits and annual-fee value are not included."
+      ],
+      "caveats": [
+        "Selected advertised benefits only; this is not a complete rewards agreement.",
+        "Review full issuer terms before payment recommendations.",
+        "Points are not a cashback percentage.",
+        "Category and booking-channel eligibility must be confirmed."
+      ]
+    }
+  ]
+}

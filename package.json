@@ -1,0 +1,21 @@
+{
+  "name": "paypal-sandbox-inspector",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env server/index.mjs",
+    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node scripts/browser-check.mjs",
+    "seed:elastic": "node --env-file-if-exists=.env scripts/seed-elastic.mjs",
+    "scrape:cards": "node scripts/scrape-card-rewards.mjs",
+    "seed:cards": "node --env-file-if-exists=.env scripts/seed-card-catalog.mjs",
+    "inspect:sandbox": "node scripts/inspect-sandbox.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  },
+  "dependencies": {
+    "@channel3/sdk": "^4.9.0"
+  }
+}

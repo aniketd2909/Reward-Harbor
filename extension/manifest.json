@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Reward Harbor \u00b7 Sandbox Advisor",
+  "version": "0.9.6",
+  "description": "Compare card rewards during PayPal sandbox checkout and track estimated reward savings.",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://sandbox.paypal.com/*",
+    "https://www.sandbox.paypal.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
+  "icons": {
+    "64": "icon.png"
+  },
+  "action": {
+    "default_title": "Compare card rewards",
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://sandbox.paypal.com/*",
+        "https://www.sandbox.paypal.com/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
+      ],
+      "js": [
+        "extractor.js",
+        "content.js",
+        "floating.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "panel.html",
+        "panel.js",
+        "panel.css"
+      ],
+      "matches": [
+        "https://sandbox.paypal.com/*",
+        "https://www.sandbox.paypal.com/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
+      ]
+    }
+  ]
+}
