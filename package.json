@@ -17,5 +17,8 @@
   },
   "dependencies": {
     "@channel3/sdk": "^4.9.0"
+  },
+  "engines": {
+    "node": ">=22.14.0 <23"
   }
 }

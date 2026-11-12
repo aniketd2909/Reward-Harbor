@@ -70,7 +70,7 @@ try {
   const selected = await page.evaluate(() => RewardExtractor.extract(document, location).selectedFundingSource);
   assert.equal(selected.last4, '2402', 'Payment-plan radio must not be mistaken for bank funding');
   assert.equal(selected.kind, 'card');
-  assert.equal(await page.evaluate(() => RewardExtractor.extract(document, location).purchase.amount), '142.89');
+  assert.equal(await page.evaluate(() => RewardExtractor.extract(document, new URL('https://sandbox.paypal.com/pay/checkout?token=ORDER123')).purchase.amount), '142.89');
 
   // Exercise our frontend callbacks and real local HTTP routes with a fake SDK/provider.
   // This does not substitute for an authenticated sandbox transaction.
@@ -122,12 +122,12 @@ try {
   await panel.route(`${base}/__panel**`, async route => {
     const path = new URL(route.request().url()).pathname;
     const file = path === '/__panel' ? 'panel.html' : path.replace('/__panel/', '');
-    if (!['panel.html', 'panel.js', 'panel.css'].includes(file)) return route.abort();
+    if (!['panel.html', 'panel.js', 'panel.css', 'config.js'].includes(file)) return route.abort();
     let source = await readFile(new URL(`../extension/${file}`, import.meta.url), 'utf8');
-    if (file === 'panel.html') source = source.replace('href="panel.css"', 'href="/__panel/panel.css"').replace('src="panel.js"', 'src="/__panel/panel.js"');
+    if (file === 'panel.html') source = source.replace('href="panel.css"', 'href="/__panel/panel.css"').replace('src="panel.js"', 'src="/__panel/panel.js"').replace('src="config.js"', 'src="/__panel/config.js"');
     await route.fulfill({ body: source, contentType: file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : 'text/html' });
   });
-  await panel.route('http://localhost:3000/api/**', async route => {
+  await panel.route('**/api/**', async route => {
     const request = route.request();
     const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
     if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
@@ -140,11 +140,11 @@ try {
     globalThis.chrome = {
       storage: { local: { async get() { return stored; }, async set(value) { Object.assign(stored, value); } } },
       tabs: { onActivated: { addListener() {} } },
-      runtime: { onMessage: { addListener(fn) { (window.extensionListeners ||= []).push(fn); } }, async sendMessage() { return { ok: true, snapshot: window.panelSnapshot || {
+      runtime: { onMessage: { addListener(fn) { (window.extensionListeners ||= []).push(fn); } }, async sendMessage() { return { ok: true, snapshot: structuredClone(window.panelSnapshot || {
         tabId: 9, page: 'https://sandbox.paypal.com/checkoutnow', note: 'Fixture cards; visible labels only.',
         cards: [{ localCardId: 'Visa:6302', network: 'Visa', last4: '6302' }, { localCardId: 'Amex:2402', network: 'Amex', last4: '2402' }],
         purchase: { merchantName: 'Harbor Market', amount: '120.00', currency: 'USD', category: 'grocery' },
-      } }; } },
+      }) }; } },
     };
   });
   await panel.goto(`${base}/__panel`);

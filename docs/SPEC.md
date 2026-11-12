@@ -1,7 +1,7 @@
 # Reward Harbor — Product and technical specification
 
 Status: implemented sandbox MVP, with validation and future work tracked in [TASKS.md](TASKS.md).
-Baseline: extension 0.9.5, reviewed 2026-11-12. This document supersedes conflicting descriptions in the original development plan.
+Baseline: extension 0.10.0, reviewed 2026-11-12. This document supersedes conflicting descriptions in the original development plan.
 
 ## 1. Product goal
 
@@ -12,7 +12,7 @@ The shopper chooses the funding source and approves payment in PayPal. Reward Ha
 ## 2. Current scope
 
 - Chrome Manifest V3 extension with a floating launcher and advisor window.
-- PayPal sandbox checkout and the local demo store at port 3000.
+- PayPal sandbox checkout and the local demo store at port 3000 and https://reward-harbor.onrender.com.
 - Channel3 product discovery on the storefront.
 - Elastic as the primary issuer reward catalog, with a local catalog fallback.
 - Two temporary sandbox card-product mappings.
@@ -134,7 +134,7 @@ flowchart LR
 
 PayPal mutations require the demo origin and session ownership. Savings routes require an installation bearer token. The order-context endpoint uses the opaque order ID as a local demo read capability; it is not a production authorization model.
 
-The backend runs on localhost. Credentials stay in environment variables: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `CHANNEL3_API_KEY`, `ELASTIC_URL`, `ELASTIC_API_KEY`, and `ELASTIC_CARD_INDEX`. Do not put secret values in source, docs, extension assets or browser responses.
+The backend supports localhost and an explicitly configured HTTPS Render origin. The extension defaults to the hosted API and preserves the originating backend on local checkout records. `DATA_DIR` configures the journal and SQLite directory; use a Render persistent disk for hosted durability. Credentials stay in environment variables: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `CHANNEL3_API_KEY`, `ELASTIC_URL`, `ELASTIC_API_KEY`, and `ELASTIC_CARD_INDEX`. Do not put secret values in source, docs, extension assets or browser responses.
 
 ## 8. Failure and lifecycle behavior
 

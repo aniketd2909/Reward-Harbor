@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000';
+let API = globalThis.RewardHarborConfig?.defaultApi || 'http://localhost:3000';
 const $ = selector => document.querySelector(selector);
 let snapshot, generation = 0, scanning = false, rescanQueued = false;
 let trackingToken, completedOrderId, lastTotals, lastTransaction;
@@ -143,6 +143,12 @@ async function scan({ automatic = false } = {}) {
     const next = response.snapshot;
     if (automatic && snapshot && JSON.stringify(snapshot) === JSON.stringify(next)) return;
     if (lastTotals && next.orderId && next.orderId !== completedOrderId && next.checkoutState !== 'completed') renderSavings(lastTotals, lastTransaction);
+    const nextApi = globalThis.RewardHarborConfig?.storeOrigin(next.apiBase) || API;
+    if (nextApi !== API) {
+      API = nextApi;
+      const history = await chrome.runtime.sendMessage({ type: 'GET_SAVINGS', apiBase: API });
+      if (history?.totals) renderSavings(history.totals);
+    }
     snapshot = next;
     if (next.orderId && next.orderId !== completedOrderId) watchingOrderId = next.orderId;
     $('#card-count').textContent = `${next.cards.length} visible card${next.cards.length === 1 ? '' : 's'} · automatic sandbox mappings`;
@@ -167,7 +173,7 @@ chrome.tabs.onActivated.addListener(() => scan({ automatic: true }));
 
 (async () => {
   trackingToken = (await chrome.runtime.sendMessage({ type: 'GET_HISTORY_TOKEN' }))?.token;
-  const history = await chrome.runtime.sendMessage({ type: 'GET_SAVINGS' });
+  const history = await chrome.runtime.sendMessage({ type: 'GET_SAVINGS', apiBase: API });
   if (history?.totals) renderSavings(history.totals);
   await scan();
 })().catch(() => scan());

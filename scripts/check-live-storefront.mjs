@@ -5,7 +5,7 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const errors = []; page.on('pageerror', e => errors.push(e.message));
-  await page.goto('http://localhost:3000');
+  await page.goto(process.env.STOREFRONT_URL || 'http://localhost:3000');
   await page.waitForFunction(() => document.querySelectorAll('[data-buy]').length > 0 || !document.querySelector('#retry-catalog').hidden, { timeout: 60000 });
   const count = await page.locator('[data-buy]').count();
   if (!count) throw new Error(await page.locator('#catalog-status').innerText());

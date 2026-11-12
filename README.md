@@ -252,4 +252,34 @@ The current integration supports PayPal sandbox and the local demo checkout. The
 The advisor now opens automatically as an isolated floating window on PayPal sandbox checkout. Use the round purple launcher to close/reopen it, or the Chrome toolbar action to toggle it. After verified payment, it opens on the demo store to keep the savings receipt visible after the PayPal popup closes. Savings totals use green text. Reload the extension and refresh the store after updating; the side-panel entry has been removed.
 
 ### Render host and HTTPS origin
-The server uses `PUBLIC_ORIGIN`, falling back to Render's `RENDER_EXTERNAL_URL`, to allow the exact deployed host and HTTPS checkout origin. Set `PUBLIC_ORIGIN=https://reward-harbor.onrender.com` explicitly if the automatic URL is unavailable. HTTPS checkout session cookies include `Secure`. Localhost remains supported for development. This setting does not change the extension's localhost backend URL or add deployed-store host permissions; those need a separate extension configuration update. Keep `.local-data` on a persistent disk to preserve payment and savings records.
+The server uses `PUBLIC_ORIGIN`, falling back to Render's `RENDER_EXTERNAL_URL`, to allow the exact deployed host and HTTPS checkout origin. Set `PUBLIC_ORIGIN=https://reward-harbor.onrender.com` explicitly if the automatic URL is unavailable. HTTPS checkout session cookies include `Secure`. Localhost remains supported for development. Extension 0.10.0 includes this deployed origin and defaults its API to Render; local checkout records retain their local backend. Keep `.local-data` on a persistent disk to preserve payment and savings records.
+
+
+### Test the hosted extension (0.10.0)
+1. Reload the unpacked extension at `chrome://extensions` and allow its updated site access.
+2. Refresh https://reward-harbor.onrender.com and close old PayPal popups.
+3. Select a product, click PayPal, and sign in with a sandbox buyer account.
+4. Verify the advisor opens, reads the current purchase and compares the two mapped cards.
+5. Choose the card in PayPal and complete payment; verify the store confirmation and extension savings receipt.
+6. Close the receipt and check that the advisor becomes compact. Repeat a payment to check cumulative totals.
+
+The public endpoint allowlist is in `extension/config.js`. No API keys are embedded in it. Local and hosted histories are separate databases; the extension associates each observed order with its originating backend.
+
+### Render persistence and runtime
+SQLite does not need a separate database service or manual schema creation: the app creates the database and tables at startup. It **does** need persistent storage on Render.
+
+- Use a paid web service with a persistent disk mounted at `/opt/render/project/src/.local-data`. Leave `DATA_DIR` unset or set it to `.local-data`.
+- Alternatively mount a disk at `/var/data` and set `DATA_DIR=/var/data`.
+- Both `checkout.json` and `rewards.sqlite`, including SQLite sidecars, must stay inside that disk. Keep a single application instance.
+- Build: `npm ci`. Start: `npm start`. Health check: `/api/health`.
+- The package pins Node 22.14+ within the 22.x line for its native `node:sqlite` API. Remove conflicting Render `NODE_VERSION` overrides or set a compatible 22.x version.
+- Set the existing PayPal sandbox, Channel3 and Elastic environment variables in Render, plus `PUBLIC_ORIGIN=https://reward-harbor.onrender.com`.
+- Local savings are not transferred automatically. Adding a new empty disk or changing `DATA_DIR` starts with empty history unless existing data is migrated safely.
+
+The deployed smoke check can be run without initiating payment:
+
+```sh
+STOREFRONT_URL=https://reward-harbor.onrender.com node scripts/check-live-storefront.mjs
+```
+
+Persistent disks are not available on Render's free web service tier. Without one, file-backed history can be lost on restart/redeploy. The public demo remains sandbox-only; live merchant/payment verification and production account authorization are separate future work.

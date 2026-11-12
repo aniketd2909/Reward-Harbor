@@ -43,7 +43,7 @@ window.addEventListener('reward-checkout-changed', notify);
 let lastPayment = '';
 function paymentChanged() {
   if (!connected()) return;
-  if (!['localhost', '127.0.0.1'].includes(location.hostname) || window !== top) return;
+  if (!(globalThis.RewardHarborConfig?.storeOrigin(location.href) || ['localhost', '127.0.0.1'].includes(location.hostname)) || window !== top) return;
   try {
     const serialized = document.documentElement.dataset.rewardPayment || 'null';
     if (serialized === lastPayment) return;

@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 test('recovers exact server order context when the content bridge and opener are missing', async () => {
   let listener; const stored = {};
-  const context = vm.createContext({ AbortSignal,
+  const context = vm.createContext({ URL, AbortSignal,
     fetch: async url => {
       assert.equal(url, 'http://localhost:3000/api/checkout-context/ORDERNEW');
       return Response.json({ orderId: 'ORDERNEW', state: 'active', purchase: {

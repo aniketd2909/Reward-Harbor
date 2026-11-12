@@ -34,7 +34,7 @@ globalThis.RewardExtractor = (() => {
       if (card) cards.set(`${card.network}:${card.last4}`, { ...card, localCardId: `${card.network}:${card.last4}`, identityConfidence: 'network-and-suffix', requiresConfirmation: true });
     }
     let purchase = { merchantName: '', amount: '', currency: 'USD', category: 'unknown', source: 'unavailable' };
-    if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+    if ((globalThis.RewardHarborConfig?.storeOrigin(location.href) || ['localhost', '127.0.0.1'].includes(location.hostname))) {
       try {
         const candidate = JSON.parse(doc.documentElement.dataset.rewardCheckout);
         if (candidate && typeof candidate.merchantName === 'string') purchase = candidate;
@@ -82,7 +82,7 @@ globalThis.RewardExtractor = (() => {
       if (selectedFundingSource) break;
     }
     let checkoutState;
-    if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+    if ((globalThis.RewardHarborConfig?.storeOrigin(location.href) || ['localhost', '127.0.0.1'].includes(location.hostname))) {
       try {
         const payment = JSON.parse(doc.documentElement.dataset.rewardPayment || 'null');
         checkoutState = payment?.state;

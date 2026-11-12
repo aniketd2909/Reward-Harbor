@@ -1,6 +1,6 @@
 # Reward Harbor — Task tracker
 
-Baseline: extension 0.9.5, reviewed 2026-11-12. Source of requirements: [SPEC.md](SPEC.md).
+Baseline: extension 0.10.0, reviewed 2026-11-12. Source of requirements: [SPEC.md](SPEC.md).
 
 Checked items describe implemented code. They do not imply a fresh authenticated PayPal test. Unchecked items are proposed remaining work; production deployment is not part of the current sandbox MVP.
 
@@ -21,7 +21,11 @@ Checked items describe implemented code. They do not imply a fresh authenticated
 - [x] MVP-13 — Handle invalidated extension contexts without uncaught errors. FR-11.
 - [x] MVP-14 — Add unit and browser regression coverage, including first-login route transition and respecting dismissal.
 
+- [x] MVP-15 — Support the Render storefront, HTTPS session cookies, deployed extension permissions/API routing, and a configurable persistent data directory.
+
 ## P0 — Validate the complete sandbox demo
+
+- [ ] DEPLOY-01 — Attach a Render persistent disk and verify savings survive a service restart. Use the README mount path/`DATA_DIR` instructions.
 
 ### QA-01 — First-login and returning-login checkout
 

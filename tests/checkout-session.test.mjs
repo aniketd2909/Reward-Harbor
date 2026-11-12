@@ -19,7 +19,7 @@ async function harness({ completed = false } = {}) {
     scripting: { executeScript: async () => [{ result: { cards: [], checkoutOrderId: orderId, purchase: { amount, currency: 'USD', category: 'unknown', source: 'unavailable' } } }] },
     runtime: { onMessage: { addListener(fn) { listener = fn; } }, sendMessage: async () => {} },
   };
-  vm.runInContext(await readFile(new URL('../extension/background.js', import.meta.url), 'utf8'), vm.createContext({ chrome, AbortSignal,
+  vm.runInContext(await readFile(new URL('../extension/background.js', import.meta.url), 'utf8'), vm.createContext({ URL, chrome, AbortSignal,
     fetch: async (url, options) => { if (url.includes('/api/checkout-context/')) return Response.json({ orderId: 'ORDER123', state: completed ? 'completed' : 'active' }); requests.push(JSON.parse(options.body)); return Response.json({ transaction: { estimatedSavingsCents: 192 }, totals: { estimatedSavingsCents: 192 } }); },
   }));
   const send = (message, sender = {}) => new Promise(resolve => listener(message, sender, resolve));

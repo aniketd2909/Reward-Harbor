@@ -1,3 +1,10 @@
+if (typeof importScripts === 'function') importScripts('config.js');
+const DEFAULT_API = globalThis.RewardHarborConfig?.defaultApi || 'http://localhost:3000';
+function storeOrigin(url) {
+  if (globalThis.RewardHarborConfig) return globalThis.RewardHarborConfig.storeOrigin(url);
+  try { const origin = new URL(url).origin; return ['http://localhost:3000', 'http://127.0.0.1:3000'].includes(origin) ? origin : null; } catch { return null; }
+}
+function backendFor(record) { return storeOrigin(record?.apiBase) || DEFAULT_API; }
 chrome.action?.onClicked.addListener(tab => {
   if (tab.id) chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_ADVISOR' }).catch(() => {});
 });
@@ -10,8 +17,8 @@ function historyToken() {
     await chrome.storage.local.set({ rewardHistoryToken: token }); return token;
   })();
 }
-async function historyRequest(path, body) {
-  const response = await fetch(`http://localhost:3000${path}`, { method: body ? 'POST' : 'GET',
+async function historyRequest(path, body, apiBase = DEFAULT_API) {
+  const response = await fetch(`${apiBase}${path}`, { method: body ? 'POST' : 'GET',
     headers: { Authorization: `Bearer ${await historyToken()}`, 'Content-Type': 'application/json' },
     ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15000) });
   const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Savings history is unavailable.'); return data;
@@ -21,7 +28,7 @@ const finalizing = new Map();
 function finalizeOrder(orderId, record) {
   if (finalizing.has(orderId)) return finalizing.get(orderId);
   const task = (async () => {
-    const receipt = await historyRequest('/api/savings/finalize', { orderId, selectedFundingSource: record.selectedFundingSource, selectionEvidence: record.selectionEvidence });
+    const receipt = await historyRequest('/api/savings/finalize', { orderId, selectedFundingSource: record.selectedFundingSource, selectionEvidence: record.selectionEvidence }, backendFor(record));
     await chrome.storage.session.set({ [`checkout:${orderId}`]: { ...record, purchase: undefined, state: 'completed', receipt, savedAt: Date.now() }, lastRewardReceipt: receipt });
     chrome.runtime.sendMessage({ type: 'SAVINGS_UPDATED', receipt }).catch(() => {});
     return receipt;
@@ -43,7 +50,7 @@ function matchingDemo(snapshots, observed) {
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
   if (message.type === 'GET_HISTORY_TOKEN') { historyToken().then(token => reply({ token })); return true; }
   if (message.type === 'GET_SAVINGS') {
-    historyRequest('/api/savings/summary').then(totals => reply({ totals })).catch(() => reply({ unavailable: true })); return true;
+    historyRequest('/api/savings/summary', null, storeOrigin(message.apiBase) || DEFAULT_API).then(totals => reply({ totals })).catch(() => reply({ unavailable: true })); return true;
   }
   if (message.type === 'FUNDING_OBSERVATION') {
     (async () => {
@@ -58,14 +65,14 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
   }
   if (message.type === 'CHECKOUT_CONTEXT') {
     (async () => {
-      if (sender.frameId !== 0 || !/^http:\/\/(localhost|127\.0\.0\.1):3000\//.test(sender.url || '') || !sender.tab?.id) return reply({ ok: false });
+      if (sender.frameId !== 0 || !storeOrigin(sender.url) || !sender.tab?.id) return reply({ ok: false });
       const { orderId, state, purchase } = message.payment || {};
       if (!/^[A-Z0-9]{5,40}$/.test(orderId || '')) return reply({ ok: false });
       const key = `checkout:${orderId}`;
       if (state === 'active') {
         if (!purchase?.merchantName || !/^\d+\.\d{2}$/.test(purchase.amount || '') || purchase.currency !== 'USD' || !purchase.category) return reply({ ok: false });
         const existing = (await chrome.storage.session.get(key))[key];
-        await chrome.storage.session.set({ [key]: { ...(existing?.state === 'active' ? existing : {}), state, originTabId: sender.tab.id, savedAt: Date.now(), purchase: {
+        await chrome.storage.session.set({ [key]: { ...(existing?.state === 'active' ? existing : {}), state, apiBase: storeOrigin(sender.url), originTabId: sender.tab.id, savedAt: Date.now(), purchase: {
           merchantName: purchase.merchantName, amount: purchase.amount, currency: purchase.currency, category: purchase.category, source: 'order-session',
           ...(purchase.country ? { country: purchase.country } : {}), ...(purchase.categoryBasis ? { categoryBasis: purchase.categoryBasis } : {}),
         } } });
@@ -92,7 +99,7 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
       const record = (await chrome.storage.session.get(`checkout:${message.orderId}`))[`checkout:${message.orderId}`];
       if (!record) return reply({ ok: false });
       if (record.receipt) return reply({ receipt: record.receipt });
-      const response = await fetch(`http://localhost:3000/api/checkout-context/${message.orderId}`, { signal: AbortSignal.timeout(5000) });
+      const response = await fetch(`${backendFor(record)}/api/checkout-context/${message.orderId}`, { signal: AbortSignal.timeout(5000) });
       const data = await response.json();
       if (response.ok && data.orderId === message.orderId && data.state === 'completed') return reply({ receipt: await finalizeOrder(message.orderId, record) });
       reply({ ok: true });
@@ -103,26 +110,31 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
     const tab = sender.tab?.id ? await chrome.tabs.get(sender.tab.id) : (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0];
     if (!tab?.id) throw new Error('Open a sandbox checkout tab first.');
     const snapshots = await snapshotsFor(tab.id);
-    if (!snapshots.length) throw new Error('Open PayPal sandbox or the localhost demo, then refresh the page after installing the extension.');
+    if (!snapshots.length) throw new Error('Open PayPal sandbox or Reward Harbor, then refresh the page after installing the extension.');
     const cards = new Map();
     for (const snapshot of snapshots) for (const card of snapshot.cards) cards.set(card.localCardId, card);
     const purchases = snapshots.map(s => s.purchase);
     let purchase = purchases.find(p => p.source === 'demo-catalog') || purchases.find(p => p.amount) || purchases[0];
     const orderId = snapshots.find(s => s.checkoutOrderId)?.checkoutOrderId;
+    let apiBase = storeOrigin(tab.url) || storeOrigin(snapshots[0].page) || DEFAULT_API;
+    if (tab.openerTabId) {
+      try { apiBase = storeOrigin((await chrome.tabs.get(tab.openerTabId)).url) || apiBase; } catch {}
+    }
     let baselineSelection = snapshots.find(s => s.selectedFundingSource)?.selectedFundingSource;
     let checkoutState = snapshots.find(s => s.checkoutState)?.checkoutState;
     if (orderId) {
       const key = `checkout:${orderId}`;
       let record = (await chrome.storage.session.get(key))[key];
+      apiBase = storeOrigin(record?.apiBase) || apiBase;
       if (!record || record.state === 'active' || record.state === 'completed' && !record.receipt) {
         try {
-          const response = await fetch(`http://localhost:3000/api/checkout-context/${encodeURIComponent(orderId)}`, { signal: AbortSignal.timeout(5000) });
+          const response = await fetch(`${apiBase}/api/checkout-context/${encodeURIComponent(orderId)}`, { signal: AbortSignal.timeout(5000) });
           if (response.ok) {
             const recovered = await response.json();
             if (recovered.orderId === orderId && recovered.purchase?.amount &&
               (!purchase.amount || purchase.amount === recovered.purchase.amount) &&
               (!purchase.currency || purchase.currency === recovered.purchase.currency)) {
-              record = { ...record, state: recovered.state, purchase: recovered.purchase, savedAt: Date.now(),
+              record = { ...record, apiBase, state: recovered.state, purchase: recovered.purchase, savedAt: Date.now(),
                 originTabId: record?.originTabId ?? tab.openerTabId ?? null };
               await chrome.storage.session.set({ [key]: record });
               checkoutState = recovered.state;
@@ -149,13 +161,13 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
     if (!['demo-catalog', 'order-session', 'server-order', 'checkout-ended'].includes(purchase.source) && tab.openerTabId) {
       try {
         const opener = await chrome.tabs.get(tab.openerTabId);
-        if (/^http:\/\/(localhost|127\.0\.0\.1):3000\//.test(opener.url || '')) {
+        if (storeOrigin(opener.url)) {
           const demo = matchingDemo(await snapshotsFor(opener.id), purchase);
           if (demo) purchase = { ...demo, source: 'demo-checkout-opener' };
         }
       } catch { /* Context stays unknown when opener is inaccessible or mismatched. */ }
     }
-    reply({ ok: true, snapshot: { tabId: tab.id, cards: [...cards.values()], purchase, orderId, baselineSelection,
+    reply({ ok: true, snapshot: { tabId: tab.id, apiBase, cards: [...cards.values()], purchase, orderId, baselineSelection,
       checkoutState,
       page: snapshots[0].page, note: snapshots[0].note } });
   })().catch(error => reply({ ok: false, error: error.message || 'Cannot inspect this page.' }));

@@ -2,7 +2,7 @@
 (() => {
   if (window !== window.top) return;
   const sandbox = /^(www\.)?sandbox\.paypal\.com$/.test(location.hostname);
-  const demo = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const demo = Boolean(globalThis.RewardHarborConfig?.storeOrigin(location.href) || ['localhost', '127.0.0.1'].includes(location.hostname));
   if (!sandbox && !demo) return;
   let host, observer, routeTimer, lastState, opened = false;
   function stop() { observer?.disconnect(); clearInterval(routeTimer); host?.remove(); }

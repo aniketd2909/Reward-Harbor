@@ -48,7 +48,7 @@ test('popup scanner inherits matching context from its actual demo opener', asyn
   let listener;
   let observedAmount = '48.00';
   const demo = { merchantName: 'Harbor Market', amount: '48.00', currency: 'USD', category: 'grocery', source: 'demo-catalog' };
-  const context = vm.createContext({ chrome: {
+  const context = vm.createContext({ URL, chrome: {
     sidePanel: { setPanelBehavior: async () => {} },
     tabs: { query: async () => [{ id: 2, openerTabId: 1 }], get: async () => ({ id: 1, url: 'http://localhost:3000/' }) },
     scripting: { executeScript: async ({ target }) => [{ result: { cards: target.tabId === 2 ? cards.slice(0, 2) : [],
