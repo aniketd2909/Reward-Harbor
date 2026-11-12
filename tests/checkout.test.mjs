@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
+import { request as httpRequest } from 'node:http';
 import { createApp } from '../server/app.mjs';
 import { createPayPal, verifiedCapture } from '../server/paypal.mjs';
 import { createStore } from '../server/store.mjs';
@@ -72,4 +73,29 @@ test('PayPal adapter always uses sandbox and stable idempotency headers', async 
   assert.equal(calls[1].options.headers['PayPal-Request-Id'], 'create-id');
   assert.equal(calls[2].options.headers['PayPal-Request-Id'], 'capture-id');
   assert.equal(calls.length, 3);
+});
+
+test('configured HTTPS deployment accepts exact host/origin and issues a Secure session cookie', async t => {
+  let creates = 0;
+  const server = createApp({ publicOrigin: 'https://reward-harbor.onrender.com', configured: true,
+    paypal: { async create() { creates++; return { id: 'RENDER123' }; } } });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const host = 'reward-harbor.onrender.com';
+  const request = (path, headers, payload) => new Promise((resolve, reject) => {
+    const req = httpRequest(base + path, { method: payload ? 'POST' : 'GET', headers }, res => {
+      res.resume(); res.on('end', () => resolve({ status: res.statusCode, headers: res.headers }));
+    });
+    req.on('error', reject); req.end(payload);
+  });
+  assert.equal((await request('/', { Host: host })).status, 200);
+  assert.equal((await request('/', { Host: 'unknown.example' })).status, 403);
+  const post = origin => request('/api/paypal/orders', { Host: host, Origin: origin, 'Content-Type': 'application/json' }, JSON.stringify({ sku: 'pantry-box' }));
+  assert.equal((await post('https://other.example')).status, 403);
+  assert.equal((await post('http://' + host)).status, 403);
+  const response = await post('https://' + host);
+  assert.equal(response.status, 200);
+  assert.match(response.headers['set-cookie'][0], /; Secure/);
+  assert.equal(creates, 1);
 });

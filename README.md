@@ -250,3 +250,6 @@ The current integration supports PayPal sandbox and the local demo checkout. The
 
 ### Floating advisor (0.9.0)
 The advisor now opens automatically as an isolated floating window on PayPal sandbox checkout. Use the round purple launcher to close/reopen it, or the Chrome toolbar action to toggle it. After verified payment, it opens on the demo store to keep the savings receipt visible after the PayPal popup closes. Savings totals use green text. Reload the extension and refresh the store after updating; the side-panel entry has been removed.
+
+### Render host and HTTPS origin
+The server uses `PUBLIC_ORIGIN`, falling back to Render's `RENDER_EXTERNAL_URL`, to allow the exact deployed host and HTTPS checkout origin. Set `PUBLIC_ORIGIN=https://reward-harbor.onrender.com` explicitly if the automatic URL is unavailable. HTTPS checkout session cookies include `Secure`. Localhost remains supported for development. This setting does not change the extension's localhost backend URL or add deployed-store host permissions; those need a separate extension configuration update. Keep `.local-data` on a persistent disk to preserve payment and savings records.

@@ -17,7 +17,9 @@ async function body(req) {
   }
   try { return text ? JSON.parse(text) : {}; } catch { throw fail(400, 'Expected JSON.'); }
 }
-export function createApp({ paypal, clientId = '', configured = false, store = createStore(), recommendation, purchaseResolver } = {}) {
+export function createApp({ paypal, clientId = '', configured = false, store = createStore(), recommendation, purchaseResolver, publicOrigin = '' } = {}) {
+  const deployed = publicOrigin ? new URL(publicOrigin) : null;
+  if (deployed && (deployed.protocol !== 'https:' || deployed.username || deployed.password || deployed.pathname !== '/' || deployed.search || deployed.hash)) throw new Error('PUBLIC_ORIGIN must be an HTTPS origin.');
   const locks = new Map();
   function serial(key, work) {
     if (locks.has(key)) return locks.get(key);
@@ -31,7 +33,9 @@ export function createApp({ paypal, clientId = '', configured = false, store = c
     res.setHeader('Referrer-Policy', 'no-referrer');
     const send = (status, data) => { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(data)); };
     try {
-      if (!/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(req.headers.host || '')) throw fail(403, 'Use the localhost demo address.');
+      const localHost = /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(req.headers.host || '');
+      const deployedHost = Boolean(deployed && req.headers.host === deployed.host);
+      if (!localHost && !deployedHost) throw fail(403, 'Use the configured checkout address.');
       const url = new URL(req.url, 'http://localhost');
       if (req.method === 'GET' && files[url.pathname]) {
         const [name, type] = files[url.pathname];
@@ -60,13 +64,13 @@ export function createApp({ paypal, clientId = '', configured = false, store = c
       if (recommendation && await recommendation(req, res, url, body, send)) return;
       if (req.method !== 'POST' || !url.pathname.startsWith('/api/paypal/')) throw fail(404, 'Not found.');
       const origin = req.headers.origin;
-      if (origin !== `http://${req.headers.host}`) throw fail(403, 'Payment requests must come from this checkout.');
+      if (origin !== (deployedHost ? deployed.origin : `http://${req.headers.host}`)) throw fail(403, 'Payment requests must come from this checkout.');
       if (!req.headers['content-type']?.startsWith('application/json')) throw fail(415, 'Expected application/json.');
       const input = await body(req);
       let session = req.headers.cookie?.match(/(?:^|;\s*)demo_session=([a-f0-9]{64})(?:;|$)/)?.[1];
       if (!session) {
         session = randomBytes(32).toString('hex');
-        res.setHeader('Set-Cookie', `demo_session=${session}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400`);
+        res.setHeader('Set-Cookie', `demo_session=${session}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400${deployedHost ? '; Secure' : ''}`);
       }
       if (!configured) throw fail(503, 'Add your sandbox client ID and secret to .env, then restart the server.');
       if (url.pathname === '/api/paypal/orders') {

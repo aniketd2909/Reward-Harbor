@@ -18,7 +18,8 @@ const shopping = channel3Service({ apiKey: process.env.CHANNEL3_API_KEY?.trim() 
 const storefront = storefrontService({ apiKey: process.env.CHANNEL3_API_KEY?.trim() });
 const rewards = rewardService({ elasticUrl: process.env.ELASTIC_URL, apiKey: process.env.ELASTIC_API_KEY, index: process.env.ELASTIC_INDEX || 'reward-rules' });
 const cards = cardCatalogService({ elasticUrl: process.env.ELASTIC_URL, apiKey: process.env.ELASTIC_API_KEY, index: process.env.ELASTIC_CARD_INDEX || 'card-catalog', savings });
-const server = createApp({ clientId, configured,
+const publicOrigin = process.env.PUBLIC_ORIGIN || process.env.RENDER_EXTERNAL_URL || '';
+const server = createApp({ clientId, configured, publicOrigin,
   paypal: createPayPal({ clientId, secret }),
   store,
   purchaseResolver: storefront.resolvePurchase,
@@ -26,7 +27,7 @@ const server = createApp({ clientId, configured,
 });
 server.listen(port, host, () => {
   console.log(`Listening on ${host}:${port}`);
-  console.log(`Sandbox checkout: http://localhost:${port}`);
+  console.log(`Sandbox checkout: ${publicOrigin || `http://localhost:${port}`}`);
   console.log(configured ? 'Sandbox credentials configured.' : 'Add sandbox credentials to .env to enable payment.');
   console.log(process.env.CHANNEL3_API_KEY?.trim() ? 'Channel3 product offers configured.' : 'Channel3 key not configured.');
 });
