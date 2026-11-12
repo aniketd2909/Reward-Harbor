@@ -10,6 +10,7 @@ import { storefrontService } from './storefront.mjs';
 const clientId = process.env.PAYPAL_CLIENT_ID?.trim() || '';
 const secret = process.env.PAYPAL_CLIENT_SECRET?.trim() || '';
 const port = Number(process.env.PORT || 3000);
+const host = process.env.HOST || (process.env.RENDER ? '0.0.0.0' : '127.0.0.1');
 const configured = Boolean(clientId && secret);
 const store = createStore('.local-data/checkout.json');
 const savings = createSavings({ store, file: '.local-data/rewards.sqlite' });
@@ -23,7 +24,8 @@ const server = createApp({ clientId, configured,
   purchaseResolver: storefront.resolvePurchase,
   recommendation: async (...args) => await storefront(...args) || await shopping(...args) || await savings.routes(...args) || await cards(...args) || await rewards(...args),
 });
-server.listen(port, '127.0.0.1', () => {
+server.listen(port, host, () => {
+  console.log(`Listening on ${host}:${port}`);
   console.log(`Sandbox checkout: http://localhost:${port}`);
   console.log(configured ? 'Sandbox credentials configured.' : 'Add sandbox credentials to .env to enable payment.');
   console.log(process.env.CHANNEL3_API_KEY?.trim() ? 'Channel3 product offers configured.' : 'Channel3 key not configured.');
